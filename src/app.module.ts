@@ -5,14 +5,13 @@ import { UserModule } from './user/user.module';
 import { EventsModule } from './events/events.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { GameModule } from './game/game.module';
-import { GameService } from './game/game.service';
+
 
 @Module({
   imports: [
-    UserModule, EventsModule, GameModule,
+    UserModule, EventsModule, 
   ],
   controllers: [AppController],
-  providers: [AppService, GameService],
+  providers: [AppService,],
 })
 export class AppModule {}
