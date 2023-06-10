@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { userActiveStatus } from 'src/user/utill/user.active.status';
 import { userKeynoteStatus } from 'src/user/utill/user.keynote.status';
 import { Inject } from '@nestjs/common';
+import { subscribe } from 'diagnostics_channel';
 
 /**
  * namespace -> 
@@ -20,10 +21,12 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   constructor(
     private readonly eventsService :EventsService
   ) {}
+  
+  private userId : number = 1;
 
   afterInit(server: Server) {
-    console.dir(server);
-    console.log('Socket.io server initialized');
+    // console.dir(server);
+    console.log('Socket.io server initialized in ');
   }
 
   handleConnection(client: Socket) {
@@ -32,19 +35,18 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const userGameDto: UserGameDto = {
       userName :'mingyu',
       userMMR : 1024,
-      nickname :'오민규리',
+      nickname :"client" + (1*this.userId) as string,
       userActive : userActiveStatus.INGAME,
       userKeynote: userKeynoteStatus.MALEKEY,
     }
-
-    userGameDto.nickname = "client" + 1 as unknown as string;
     userGameDto.userMMR += 100;
-  
+    this.userId += 1;
+    console.log('client : ', userGameDto.nickname);
     const userSocketDto :UserSocketDto = {
       userGameDto : userGameDto,
       socket : client
     }
-    //
+    
     this.eventsService.userConnection(userSocketDto);
   }
 
@@ -55,12 +57,24 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('chat')
   handleAudioData(client: Socket, message: string) {
     console.log(`Received message from client (${client.id}): ${message}`);
-
-    const usersWithSameRoom = this.eventsService.message(client);
+    
+    const usersWithSameRoom = this.eventsService.findUsersinRoom(client);
     for(const user of usersWithSameRoom){
+      console.log('user', user.userGameDto.nickname);
       user.socket.emit('chat', message);
     }
   }
 
+  @SubscribeMessage('item')
+  handleItemData(client: Socket, item: string) {
+    
+  }
+
+  @SubscribeMessage('score')
+  handleScoreData(client: Socket, pitch: number){
+    
+  }
+
+  
  
 }
