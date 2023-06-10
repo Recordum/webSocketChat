@@ -20,11 +20,19 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@fastify/static": "^6.10.2",
+    "@fastify/view": "^7.4.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-fastify": "^9.4.2",
     "@nestjs/platform-socket.io": "^9.4.2",
+    "@nestjs/serve-static": "^3.0.1",
     "@nestjs/websockets": "^9.4.2",
+    "fastify": "^4.18.0",
+    "handlebars": "^4.7.7",
+    "hbs": "^4.2.0",
+    "point-of-view": "^6.3.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "socket.io": "^4.6.2"
