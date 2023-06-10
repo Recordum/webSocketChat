@@ -4,14 +4,13 @@ import { UserSocketDto } from './dto/events.user.socket.dto';
 import { GameRoomStatus } from './util/events.game.room.status';
 import { GameRoom } from './dto/events.game.room.dto';
 import { MAXUSER } from './util/events.const';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class GameRoomService {
     
     private roomList : Map<GameRoom, Array<UserSocketDto>> = new Map();
     
-    
-
     // public destroyRoom(roomId: number) {
     //     this.roomList.delete(roomId);
     // }
@@ -25,14 +24,21 @@ export class GameRoomService {
     }
 
     public findEmptyRoom() : GameRoom{
-
         for (const key of this.roomList.keys()) {
-            if (key.gameRoomStatus == GameRoomStatus.MATCHING) {
+            if (key.gameRoomStatus === GameRoomStatus.MATCHING) {
                 return key
             }
         }
-        
         return this.createRoom();
+    }
+
+    public findUsersInRoom(client: Socket): Array<UserSocketDto>{
+        for (const userSocketList of this.roomList.values()) {
+            const foundUserSocket = userSocketList.find(userSocket => userSocket.socket === client);
+            if (foundUserSocket) {
+              return userSocketList;
+            }
+        }
     }
 
     private roomCount() : number{

@@ -1,3 +1,4 @@
+import { userActiveStatus } from './../user/utill/user.active.status';
 import { GameRoomService } from './events.game.room.service';
 import { UserGameDto } from './../user/dto/user.game.dto';
 import { Injectable } from '@nestjs/common';
@@ -11,9 +12,12 @@ export class EventsService {
         private gameRoomService: GameRoomService
     ){}
 
-public userConnection(userSocketDto : UserSocketDto) {
-    const emptyRoom : GameRoom = this.gameRoomService.findEmptyRoom();
-    this.gameRoomService.addUser(emptyRoom,userSocketDto);
-}
+    public userConnection(userSocketDto : UserSocketDto) {
+        const emptyRoom : GameRoom = this.gameRoomService.findEmptyRoom();
+        this.gameRoomService.addUser(emptyRoom,userSocketDto);
+    }   
 
+    public message(client: Socket): Array<UserSocketDto>{
+       return this.gameRoomService.findUsersInRoom(client);
+    }
 }

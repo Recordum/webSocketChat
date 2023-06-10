@@ -1,3 +1,4 @@
+import { UserSocketDto } from './dto/events.user.socket.dto';
 import { EventsService } from './events.service';
 import { UserGameDto} from './../user/dto/user.game.dto';
 import * as Pitchfinder from "pitchfinder";
@@ -15,8 +16,6 @@ import { Inject } from '@nestjs/common';
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
   
   @WebSocketServer() server: Server;
-
-  private connectedClients: Map<string, Socket> = new Map();
   
   constructor(
     private readonly eventsService :EventsService
@@ -28,7 +27,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   handleConnection(client: Socket) {
-    
+    //실제 운영할때는 클라이언트에쪽에서 보낼정보들.
     console.log(`Client connected: ${client.id}`);
     const userGameDto: UserGameDto = {
       userName :'mingyu',
@@ -37,25 +36,30 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       userActive : userActiveStatus.INGAME,
       userKeynote: userKeynoteStatus.MALEKEY,
     }
-    userGameDto.nickname = "client" + this.connectedClients.size as unknown as string;
-    userGameDto.userMMR += this.connectedClients.size;
 
-    this.connectedClients.set(client.id, client);
-    
+    userGameDto.nickname = "client" + 1 as unknown as string;
+    userGameDto.userMMR += 100;
+  
+    const userSocketDto :UserSocketDto = {
+      userGameDto : userGameDto,
+      socket : client
+    }
+    //
+    this.eventsService.userConnection(userSocketDto);
   }
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    this.connectedClients.delete(client.id);
   }
 
   @SubscribeMessage('chat')
   handleAudioData(client: Socket, message: string) {
     console.log(`Received message from client (${client.id}): ${message}`);
 
-    this.connectedClients.forEach((values, key, obj) => {
-      values.emit('chat', message);
-    })
+    const usersWithSameRoom = this.eventsService.message(client);
+    for(const user of usersWithSameRoom){
+      user.socket.emit('chat', message);
+    }
   }
 
  
