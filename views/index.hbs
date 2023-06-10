@@ -30,6 +30,7 @@
     function sendMessage() {
       const input = document.getElementById('message-input');
       const message = input.value;
+      console.log(message);
       input.value = '';
       socket.emit('chat', message);
     }

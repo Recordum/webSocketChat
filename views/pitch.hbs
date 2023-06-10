@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pitch Detection</title>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Pitch Detection</h1>
+  
+  <div>
+    <button id="startButton">Start Recording</button>
+    <button id="stopButton">Stop Recording</button>
+  </div>
+  
+  <div id="pitchData"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const startButton = document.getElementById('startButton');
+      const stopButton = document.getElementById('stopButton');
+      const pitchDataDiv = document.getElementById('pitchData');
+      const socket = io('http://localhost:3000');
+
+        socket.on('connect', () => {
+        console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+        });
+      let mediaRecorder = null;
+      let chunks = [];
+
+      // Connect to the server
+      
+
+      // Start recording audio
+      startButton.addEventListener('click', () => {
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        chunks = [];
+        
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then((stream) => {
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.addEventListener('dataavailable', (e) => {
+              chunks.push(e.data);
+            });
+
+            mediaRecorder.addEventListener('stop', () => {
+              const audioBlob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
+              const reader = new FileReader();
+
+              reader.onloadend = () => {
+                const audioData = new Float32Array(reader.result);
+                socket.emit('audioData', audioData);
+              };
+
+              reader.readAsArrayBuffer(audioBlob);
+            });
+
+            mediaRecorder.start();
+          })
+          .catch((err) => {
+            console.error('Error accessing microphone:', err);
+          });
+      });
+
+      // Stop recording audio
+      stopButton.addEventListener('click', () => {
+        startButton.disabled = false;
+        stopButton.disabled = true;
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      });
+
+      // Receive pitch data from the server
+      socket.on('pitchData', (pitch) => {
+        pitchDataDiv.textContent = `Detected Pitch: ${pitch}`;
+      });
+    });
+  </script>
+</body>
+</html>

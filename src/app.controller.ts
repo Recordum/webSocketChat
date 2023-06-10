@@ -10,4 +10,10 @@ export class AppController {
   getHello() {
     return;
   }
+
+  @Get('/pitch')
+  @Render('pitch')
+  getPitch() {
+    return;
+  }
 }
