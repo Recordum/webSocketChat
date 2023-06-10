@@ -3,6 +3,7 @@ import { UserGameDto } from './../user/dto/user.game.dto';
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { UserSocketDto } from './dto/events.user.socket.dto';
+import { GameRoom } from './dto/events.game.room.dto';
 
 @Injectable()
 export class EventsService {
@@ -11,9 +12,8 @@ export class EventsService {
     ){}
 
 public userConnection(userSocketDto : UserSocketDto) {
-    
-    this.gameRoomService.roomCount()
-    this.gameRoomService.addUser(13,userSocketDto);
+    const emptyRoom : GameRoom = this.gameRoomService.findEmptyRoom();
+    this.gameRoomService.addUser(emptyRoom,userSocketDto);
 }
 
 }

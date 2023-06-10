@@ -1,0 +1,1 @@
+export const MAXUSER : number = 3;
